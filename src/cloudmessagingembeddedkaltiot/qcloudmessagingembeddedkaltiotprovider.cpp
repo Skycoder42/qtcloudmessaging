@@ -47,12 +47,12 @@ static QCloudMessagingEmbeddedKaltiotProvider *m_KaltiotServiceProvider;
  * \brief QCloudMessagingEmbeddedKaltiotProvider::QCloudMessagingEmbeddedKaltiotProvider
  */
 QCloudMessagingEmbeddedKaltiotProvider::QCloudMessagingEmbeddedKaltiotProvider(QObject *parent) :
-    QCloudMessagingProvider(parent),
-    d(new QCloudMessagingEmbeddedKaltiotProviderPrivate)
+	QCloudMessagingProvider(parent),
+	d(new QCloudMessagingEmbeddedKaltiotProviderPrivate)
 {
-    m_KaltiotServiceProvider = this;
-    connect(&d->m_restInterface, &QCloudMessagingEmbeddedKaltiotRest::remoteClientsReceived,
-            this, &QCloudMessagingEmbeddedKaltiotProvider::remoteClientsReceived);
+	m_KaltiotServiceProvider = this;
+	connect(&d->m_restInterface, &QCloudMessagingEmbeddedKaltiotRest::remoteClientsReceived,
+			this, &QCloudMessagingEmbeddedKaltiotProvider::remoteClientsReceived);
 }
 
 /*!
@@ -60,7 +60,7 @@ QCloudMessagingEmbeddedKaltiotProvider::QCloudMessagingEmbeddedKaltiotProvider(Q
  */
 QCloudMessagingEmbeddedKaltiotProvider::~QCloudMessagingEmbeddedKaltiotProvider()
 {
-    deregisterProvider();
+	deregisterProvider();
 }
 
 /*!
@@ -70,19 +70,19 @@ QCloudMessagingEmbeddedKaltiotProvider::~QCloudMessagingEmbeddedKaltiotProvider(
  * \return
  */
 bool QCloudMessagingEmbeddedKaltiotProvider::registerProvider(const QString  &serviceID,
-                                                              const QVariantMap &parameters)
+															  const QVariantMap &parameters)
 {
-    d->m_serviceID = serviceID;
+	d->m_serviceID = serviceID;
 
-    QCloudMessagingProvider::registerProvider(serviceID, parameters);
+	QCloudMessagingProvider::registerProvider(serviceID, parameters);
 
-    setServiceState(QtCloudMessagingProviderRegistered);
+	setServiceState(QtCloudMessagingProviderRegistered);
 
-    // Get the API key for HTTP communication
-    d->m_key = parameters.value(QStringLiteral("SERVER_API_KEY")).toString();
-    d->m_restInterface.setAuthKey(d->m_key);
+	// Get the API key for HTTP communication
+	d->m_key = parameters.value(QStringLiteral("SERVER_API_KEY")).toString();
+	d->m_restInterface.setAuthKey(d->m_key);
 
-    return QtCloudMessagingProviderRegistered;
+	return true;
 }
 
 /*!
@@ -91,7 +91,7 @@ bool QCloudMessagingEmbeddedKaltiotProvider::registerProvider(const QString  &se
  */
 void QCloudMessagingEmbeddedKaltiotProvider::deregisterProvider()
 {
-    QCloudMessagingProvider::deregisterProvider();
+	QCloudMessagingProvider::deregisterProvider();
 }
 
 /*!
@@ -101,10 +101,10 @@ void QCloudMessagingEmbeddedKaltiotProvider::deregisterProvider()
  */
 QCloudMessagingProvider::CloudMessagingProviderState QCloudMessagingEmbeddedKaltiotProvider::setServiceState(QCloudMessagingProvider::CloudMessagingProviderState service_mode)
 {
-    if (getServiceState() != QtCloudMessagingProviderNotRegistered) {
-        return QCloudMessagingProvider::setServiceState(service_mode);
-    }
-    return QtCloudMessagingProviderNotRegistered;
+	if (getServiceState() != QtCloudMessagingProviderNotRegistered) {
+		return QCloudMessagingProvider::setServiceState(service_mode);
+	}
+	return QtCloudMessagingProviderNotRegistered;
 }
 
 /*!
@@ -114,19 +114,19 @@ QCloudMessagingProvider::CloudMessagingProviderState QCloudMessagingEmbeddedKalt
  * \return
  */
 QString QCloudMessagingEmbeddedKaltiotProvider::connectClient(const QString  &clientId,
-                                                              const QVariantMap &parameters)
+															  const QVariantMap &parameters)
 {
-    if (!providerId().isEmpty()) {
-        QCloudMessagingEmbeddedKaltiotClient *serviceClient = new QCloudMessagingEmbeddedKaltiotClient();
+	if (!providerId().isEmpty()) {
+		QCloudMessagingEmbeddedKaltiotClient *serviceClient = new QCloudMessagingEmbeddedKaltiotClient();
 
-        QString retval = connectClientToProvider(clientId, parameters, serviceClient);
+		QString retval = connectClientToProvider(clientId, parameters, serviceClient);
 
 #ifdef ANDROID_OS
-        QtAndroid::androidActivity().callMethod<void>("init_kaltiot_wrapper", "()V");
+		QtAndroid::androidActivity().callMethod<void>("init_kaltiot_wrapper", "()V");
 #endif
-        return retval;
-    }
-    return QString();
+		return retval;
+	}
+	return QString();
 }
 
 /*!
@@ -138,41 +138,41 @@ QString QCloudMessagingEmbeddedKaltiotProvider::connectClient(const QString  &cl
  * \return
  */
 bool QCloudMessagingEmbeddedKaltiotProvider::sendMessage(const QByteArray &msg,
-                                                         const QString &clientId,
-                                                         const QString &clientToken,
-                                                         const QString &channel)
+														 const QString &clientId,
+														 const QString &clientToken,
+														 const QString &channel)
 {
-    // Is this local client?
-    if (!clientId.isEmpty()) {
+	// Is this local client?
+	if (!clientId.isEmpty()) {
 
-        if (getKaltiotClient(clientId) && clientToken.isEmpty()) {
-            getKaltiotClient(clientId)->messageReceived(clientId, msg);
-            return true;
-        }
+		if (getKaltiotClient(clientId) && clientToken.isEmpty()) {
+			getKaltiotClient(clientId)->messageReceived(clientId, msg);
+			return true;
+		}
 
-        // No, not local. Its somewhere out there
-    } else {
+		// No, not local. Its somewhere out there
+	} else {
 
-        if (!clientToken.isEmpty() && channel.isEmpty()) {
+		if (!clientToken.isEmpty() && channel.isEmpty()) {
 
-            // Publish message to server via kaltiot SDK
-            QCloudMessagingEmbeddedKaltiotClient *tempClient =
-                    (QCloudMessagingEmbeddedKaltiotClient *) clients()->first();
+			// Publish message to server via kaltiot SDK
+			QCloudMessagingEmbeddedKaltiotClient *tempClient =
+					(QCloudMessagingEmbeddedKaltiotClient *) clients()->first();
 
-            if (tempClient)
-                return tempClient->sendMessage(msg, clientToken, QString());
-        }
+			if (tempClient)
+				return tempClient->sendMessage(msg, clientToken, QString());
+		}
 
-        // Send to known device by using rest api - by giving not empty string to channel
-        if (!clientToken.isEmpty() && !channel.isEmpty())
-            return d->m_restInterface.sendDataToDevice(clientToken, msg);
+		// Send to known device by using rest api - by giving not empty string to channel
+		if (!clientToken.isEmpty() && !channel.isEmpty())
+			return d->m_restInterface.sendDataToDevice(clientToken, msg);
 
-        // Broadcast to subscribed channel!
-        if (clientToken.isEmpty() && !channel.isEmpty())
-            return d->m_restInterface.sendBroadcast(channel, msg);
-    }
+		// Broadcast to subscribed channel!
+		if (clientToken.isEmpty() && !channel.isEmpty())
+			return d->m_restInterface.sendBroadcast(channel, msg);
+	}
 
-    return false;
+	return false;
 }
 
 /*!
@@ -182,10 +182,10 @@ bool QCloudMessagingEmbeddedKaltiotProvider::sendMessage(const QByteArray &msg,
  * \return
  */
 void QCloudMessagingEmbeddedKaltiotProvider::disconnectClient(
-        const QString  &clientId,
-        const QVariantMap &parameters)
+		const QString  &clientId,
+		const QVariantMap &parameters)
 {
-    QCloudMessagingProvider::disconnectClient(clientId, parameters);
+	QCloudMessagingProvider::disconnectClient(clientId, parameters);
 }
 
 /*!
@@ -194,7 +194,7 @@ void QCloudMessagingEmbeddedKaltiotProvider::disconnectClient(
  */
 QMap <QString, QCloudMessagingClient*> *QCloudMessagingEmbeddedKaltiotProvider::clients()
 {
-    return QCloudMessagingProvider::clients();
+	return QCloudMessagingProvider::clients();
 }
 
 /*!
@@ -203,8 +203,8 @@ QMap <QString, QCloudMessagingClient*> *QCloudMessagingEmbeddedKaltiotProvider::
  */
 bool QCloudMessagingEmbeddedKaltiotProvider::remoteClients()
 {
-    // Requesting remote clients via REST APi interface.
-    return d->m_restInterface.getAllDevices();
+	// Requesting remote clients via REST APi interface.
+	return d->m_restInterface.getAllDevices();
 }
 
 /*!
@@ -213,9 +213,9 @@ bool QCloudMessagingEmbeddedKaltiotProvider::remoteClients()
  * \param uuid
  */
 void QCloudMessagingEmbeddedKaltiotProvider::setClientToken(const QString  &client,
-                                                            const QString  &uuid)
+															const QString  &uuid)
 {
-    getKaltiotClient(client)->setClientToken(uuid);
+	getKaltiotClient(client)->setClientToken(uuid);
 }
 
 /*!
@@ -224,9 +224,9 @@ void QCloudMessagingEmbeddedKaltiotProvider::setClientToken(const QString  &clie
  * \param message
  */
 void QCloudMessagingEmbeddedKaltiotProvider::cloudMessageReceived(const QString  &client,
-                                                                  const QByteArray  &message)
+																  const QByteArray  &message)
 {
-    getKaltiotClient(client)->cloudMessageReceived(client, message);
+	getKaltiotClient(client)->cloudMessageReceived(client, message);
 
 }
 
@@ -237,12 +237,12 @@ void QCloudMessagingEmbeddedKaltiotProvider::cloudMessageReceived(const QString 
  * \return
  */
 bool QCloudMessagingEmbeddedKaltiotProvider::subscribeToChannel(const QString  &channel,
-                                                               const QString  &clientId)
+															   const QString  &clientId)
 {
-    if (getKaltiotClient(clientId)) {
-        return getKaltiotClient(clientId)->subscribeToChannel(channel);
-    }
-    return false;
+	if (getKaltiotClient(clientId)) {
+		return getKaltiotClient(clientId)->subscribeToChannel(channel);
+	}
+	return false;
 }
 
 /*!
@@ -252,13 +252,13 @@ bool QCloudMessagingEmbeddedKaltiotProvider::subscribeToChannel(const QString  &
  * \return
  */
 bool QCloudMessagingEmbeddedKaltiotProvider::unsubscribeFromChannel(
-        const QString  &channel,
-        const QString  &clientId)
+		const QString  &channel,
+		const QString  &clientId)
 {
-    if (getKaltiotClient(clientId)) {
-        return getKaltiotClient(clientId)->unsubscribeFromChannel(channel);
-    }
-    return false;
+	if (getKaltiotClient(clientId)) {
+		return getKaltiotClient(clientId)->unsubscribeFromChannel(channel);
+	}
+	return false;
 }
 
 /*!
@@ -267,9 +267,9 @@ bool QCloudMessagingEmbeddedKaltiotProvider::unsubscribeFromChannel(
  * \return
  */
 QCloudMessagingEmbeddedKaltiotClient *QCloudMessagingEmbeddedKaltiotProvider::
-                                        getKaltiotClient(const QString &clientId)
+										getKaltiotClient(const QString &clientId)
 {
-    return (QCloudMessagingEmbeddedKaltiotClient *)client(clientId);
+	return (QCloudMessagingEmbeddedKaltiotClient *)client(clientId);
 }
 
 /*** CALLBACK IMPLEMENTATIONS AGAINST KALTIOT SMART IOT LIBRARY */
@@ -285,22 +285,22 @@ QCloudMessagingEmbeddedKaltiotClient *QCloudMessagingEmbeddedKaltiotProvider::
  * \param msg_id_length
  */
 void ks_gw_client_notification_cb(const char *address, const char *payload,
-                                  const uint16_t payload_length,
-                                  const payload_type_t payload_type,
-                                  const char *msg_id,
-                                  const uint16_t msg_id_length)
+								  const uint16_t payload_length,
+								  const payload_type_t payload_type,
+								  const char *msg_id,
+								  const uint16_t msg_id_length)
 {
-    Q_UNUSED(payload_type);
-    Q_UNUSED(msg_id);
-    Q_UNUSED(msg_id_length);
+	Q_UNUSED(payload_type);
+	Q_UNUSED(msg_id);
+	Q_UNUSED(msg_id_length);
 
-    QString client = address != nullptr ? QString::fromLatin1(address) : QString();
-    QByteArray b_payload = payload != nullptr ? QByteArray(payload,
-                                                        payload_length) : QString().toLatin1();
-    //QString msg =   QString::fromLatin1(b_payload);
+	QString client = address != nullptr ? QString::fromLatin1(address) : QString();
+	QByteArray b_payload = payload != nullptr ? QByteArray(payload,
+														payload_length) : QString().toLatin1();
+	//QString msg =   QString::fromLatin1(b_payload);
 
-    if (!client.isEmpty())
-        m_KaltiotServiceProvider->cloudMessageReceived(client, b_payload);
+	if (!client.isEmpty())
+		m_KaltiotServiceProvider->cloudMessageReceived(client, b_payload);
 }
 
 /*!
@@ -312,11 +312,11 @@ void ks_gw_client_notification_cb(const char *address, const char *payload,
  */
 void ks_gw_client_state_changed_cb(KaltiotSmartState state, KaltiotSmartError error)
 {
-    Q_UNUSED(error);
+	Q_UNUSED(error);
 
-    // State related to client - assuming first client
-    QCloudMessagingEmbeddedKaltiotClient *firstClient = (QCloudMessagingEmbeddedKaltiotClient *)m_KaltiotServiceProvider->clients()->first();
-    emit firstClient->clientStateChanged(firstClient->clientId(), state);
+	// State related to client - assuming first client
+	QCloudMessagingEmbeddedKaltiotClient *firstClient = (QCloudMessagingEmbeddedKaltiotClient *)m_KaltiotServiceProvider->clients()->first();
+	emit firstClient->clientStateChanged(firstClient->clientId(), state);
 
 }
 
@@ -329,13 +329,13 @@ void ks_gw_client_state_changed_cb(KaltiotSmartState state, KaltiotSmartError er
  * \param secret
  */
 void ks_gw_client_rid_cb(const char *address, const char *rid,
-                         const char *secret)
+						 const char *secret)
 {
-    if (!address) address = "nullptr";
-    if (!rid) rid = "nullptr";
-    if (!secret) secret = "nullptr";
+	if (!address) address = "nullptr";
+	if (!rid) rid = "nullptr";
+	if (!secret) secret = "nullptr";
 
-    m_KaltiotServiceProvider->setClientToken(QString::fromLatin1(address), QString::fromLatin1(rid));
+	m_KaltiotServiceProvider->setClientToken(QString::fromLatin1(address), QString::fromLatin1(rid));
 
 }
 
@@ -352,14 +352,14 @@ void ks_gw_client_rid_cb(const char *address, const char *rid,
  */
 static void fromJavaOnStateChanged(JNIEnv *env, jobject thiz, jstring address, jstring state)
 {
-    Q_UNUSED(env)
-    Q_UNUSED(thiz)
+	Q_UNUSED(env)
+	Q_UNUSED(thiz)
 
-    QAndroidJniObject _address = address;
-    QAndroidJniObject _state = state;
+	QAndroidJniObject _address = address;
+	QAndroidJniObject _state = state;
 
-    ks_gw_client_state_changed_cb((KaltiotSmartState)_state.toString().toInt(),
-                                   (KaltiotSmartError) 0);
+	ks_gw_client_state_changed_cb((KaltiotSmartState)_state.toString().toInt(),
+								   (KaltiotSmartError) 0);
 }
 
 /*!
@@ -373,14 +373,14 @@ static void fromJavaOnStateChanged(JNIEnv *env, jobject thiz, jstring address, j
  */
 static void fromJavaOnRidChanged(JNIEnv *env, jobject thiz, jstring address, jstring rid)
 {
-    Q_UNUSED(env)
-    Q_UNUSED(thiz)
+	Q_UNUSED(env)
+	Q_UNUSED(thiz)
 
 
-    QAndroidJniObject _address = address;
-    QAndroidJniObject _rid = rid;
+	QAndroidJniObject _address = address;
+	QAndroidJniObject _rid = rid;
 
-    ks_gw_client_rid_cb(_address.toString().toLatin1(), _rid.toString().toLatin1(), nullptr);
+	ks_gw_client_rid_cb(_address.toString().toLatin1(), _rid.toString().toLatin1(), nullptr);
 
 }
 
@@ -395,11 +395,11 @@ static void fromJavaOnRidChanged(JNIEnv *env, jobject thiz, jstring address, jst
  */
 static void fromJavaOnAppIdChanged(JNIEnv *env, jobject thiz, jstring address, jstring appid)
 {
-    Q_UNUSED(env)
-    Q_UNUSED(thiz)
+	Q_UNUSED(env)
+	Q_UNUSED(thiz)
 
-    QAndroidJniObject _address = address;
-    QAndroidJniObject _appid = appid;
+	QAndroidJniObject _address = address;
+	QAndroidJniObject _appid = appid;
 
 }
 
@@ -416,65 +416,65 @@ static void fromJavaOnAppIdChanged(JNIEnv *env, jobject thiz, jstring address, j
  * \param payload_type
  */
 static void fromJavaOnNotification(JNIEnv *env, jobject thiz, jstring address, jstring payload,
-                                   jstring msg, jint payload_length, jint payload_type)
+								   jstring msg, jint payload_length, jint payload_type)
 {
-    Q_UNUSED(env)
-    Q_UNUSED(thiz)
+	Q_UNUSED(env)
+	Q_UNUSED(thiz)
 
-    const char *_payload = env->GetStringUTFChars(payload, JNI_FALSE);
+	const char *_payload = env->GetStringUTFChars(payload, JNI_FALSE);
 
-    const char *_address = env->GetStringUTFChars(address, JNI_FALSE);
-    const char *_msg = env->GetStringUTFChars(msg, JNI_FALSE);
-    ks_gw_client_notification_cb(_address,
-                                 _payload,
-                                 payload_length,
-                                 (payload_type_t)payload_type,
-                                 _msg,
-                                 sizeof(_msg));
+	const char *_address = env->GetStringUTFChars(address, JNI_FALSE);
+	const char *_msg = env->GetStringUTFChars(msg, JNI_FALSE);
+	ks_gw_client_notification_cb(_address,
+								 _payload,
+								 payload_length,
+								 (payload_type_t)payload_type,
+								 _msg,
+								 sizeof(_msg));
 
 }
 
 static JNINativeMethod methods[] {
-    //{"native_notification_callback", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;II;)V", reinterpret_cast<void *>(fromJavaOnNotification)},
-    {"native_state_callback", "(Ljava/lang/String;Ljava/lang/String;)V", reinterpret_cast<void *>(fromJavaOnStateChanged)},
-    {"native_rid_callback", "(Ljava/lang/String;Ljava/lang/String;)V", reinterpret_cast<void *>(fromJavaOnRidChanged)},
-    {"native_appid_callback", "(Ljava/lang/String;Ljava/lang/String;)V", reinterpret_cast<void *>(fromJavaOnAppIdChanged)},
+	//{"native_notification_callback", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;II;)V", reinterpret_cast<void *>(fromJavaOnNotification)},
+	{"native_state_callback", "(Ljava/lang/String;Ljava/lang/String;)V", reinterpret_cast<void *>(fromJavaOnStateChanged)},
+	{"native_rid_callback", "(Ljava/lang/String;Ljava/lang/String;)V", reinterpret_cast<void *>(fromJavaOnRidChanged)},
+	{"native_appid_callback", "(Ljava/lang/String;Ljava/lang/String;)V", reinterpret_cast<void *>(fromJavaOnAppIdChanged)},
 
 };
 
 extern "C"
 {
 
-    JNIEXPORT void JNICALL
-    Java_com_snowgrains_radarsensor_QtApp_native_1notification_1callback__Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2II(
-        JNIEnv *env, jobject thiz, jstring address, jstring payload, jstring msg, jint payload_length,
-        jint payload_type)
-    {
-        env = env;
-        const char *_payload = payload != nullptr ? env->GetStringUTFChars(payload, JNI_FALSE) : nullptr;
-        const char *_address = address != nullptr ? env->GetStringUTFChars(address, JNI_FALSE) : nullptr;
-        const char *_msg = msg != nullptr ? env->GetStringUTFChars(msg, JNI_FALSE) : nullptr;
-        ks_gw_client_notification_cb(_address,
-                                     _payload,
-                                     payload_length,
-                                     (payload_type_t)payload_type,
-                                     _msg,
-                                     sizeof(_msg));
-    }
+	JNIEXPORT void JNICALL
+	Java_com_snowgrains_radarsensor_QtApp_native_1notification_1callback__Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2II(
+		JNIEnv *env, jobject thiz, jstring address, jstring payload, jstring msg, jint payload_length,
+		jint payload_type)
+	{
+		env = env;
+		const char *_payload = payload != nullptr ? env->GetStringUTFChars(payload, JNI_FALSE) : nullptr;
+		const char *_address = address != nullptr ? env->GetStringUTFChars(address, JNI_FALSE) : nullptr;
+		const char *_msg = msg != nullptr ? env->GetStringUTFChars(msg, JNI_FALSE) : nullptr;
+		ks_gw_client_notification_cb(_address,
+									 _payload,
+									 payload_length,
+									 (payload_type_t)payload_type,
+									 _msg,
+									 sizeof(_msg));
+	}
 
-    JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *)
-    {
+	JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *)
+	{
 
-        JNIEnv *env;
-        if (vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_4) != JNI_OK) {
-            return JNI_FALSE;
-        }
-        jclass clazz = env->FindClass("com/snowgrains/radarsensor/QtApp");
-        if (env->RegisterNatives(clazz, methods, sizeof(methods) / sizeof(methods[0])) < 0) {
-            return JNI_FALSE;
-        }
-        return JNI_VERSION_1_4;
-    }
+		JNIEnv *env;
+		if (vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_4) != JNI_OK) {
+			return JNI_FALSE;
+		}
+		jclass clazz = env->FindClass("com/snowgrains/radarsensor/QtApp");
+		if (env->RegisterNatives(clazz, methods, sizeof(methods) / sizeof(methods[0])) < 0) {
+			return JNI_FALSE;
+		}
+		return JNI_VERSION_1_4;
+	}
 }
 #endif
 

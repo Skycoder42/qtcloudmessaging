@@ -43,13 +43,13 @@ const QString SERVER_ADDRESS = QStringLiteral("https://restapi.torqhub.io");
  */
 bool QCloudMessagingEmbeddedKaltiotRest::getAllDevices()
 {
-    QString url = SERVER_ADDRESS + "/rids/identities" + "?ApiKey=" + m_auth_key;
-    QUrl uri(url);
-    QNetworkRequest request(uri);
+	QString url = SERVER_ADDRESS + QStringLiteral("/rids/identities") + QStringLiteral("?ApiKey=") + m_auth_key;
+	QUrl uri(url);
+	QNetworkRequest request(uri);
 
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "text/plain; charset=ISO-8859-1");
+	request.setHeader(QNetworkRequest::ContentTypeHeader, QByteArrayLiteral("text/plain; charset=ISO-8859-1"));
 
-    return sendMessage(GET_MSG, REQ_GET_ALL_DEVICES, request, "", true, "");
+	return sendMessage(GET_MSG, REQ_GET_ALL_DEVICES, request, {}, true, {});
 }
 
 /*!
@@ -61,13 +61,13 @@ bool QCloudMessagingEmbeddedKaltiotRest::getAllDevices()
 bool QCloudMessagingEmbeddedKaltiotRest::sendDataToDevice(const QString &rid, const QByteArray &data)
 {
 
-    QString url = SERVER_ADDRESS + "/rids/" + rid + "?ApiKey=" + m_auth_key;
-    QUrl uri(url);
-    QNetworkRequest request(uri);
+	QString url = SERVER_ADDRESS + QStringLiteral("/rids/") + rid + QStringLiteral("?ApiKey=") + m_auth_key;
+	QUrl uri(url);
+	QNetworkRequest request(uri);
 
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "text/plain; charset=ISO-8859-1");
+	request.setHeader(QNetworkRequest::ContentTypeHeader, QByteArrayLiteral("text/plain; charset=ISO-8859-1"));
 
-    return sendMessage(POST_MSG, REQ_SEND_DATA_TO_DEVICE, request, data, true, "");
+	return sendMessage(POST_MSG, REQ_SEND_DATA_TO_DEVICE, request, data, true, {});
 }
 
 /*!
@@ -79,12 +79,12 @@ bool QCloudMessagingEmbeddedKaltiotRest::sendDataToDevice(const QString &rid, co
 bool QCloudMessagingEmbeddedKaltiotRest::sendBroadcast(const QString &channel, const QByteArray &data)
 {
 
-    QString url = SERVER_ADDRESS + "/rids/channel/" + channel + "?ApiKey=" + m_auth_key;
-    QUrl uri(url);
-    QNetworkRequest request(uri);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "text/plain; charset=ISO-8859-1");
+	QString url = SERVER_ADDRESS + QStringLiteral("/rids/channel/") + channel + QStringLiteral("?ApiKey=") + m_auth_key;
+	QUrl uri(url);
+	QNetworkRequest request(uri);
+	request.setHeader(QNetworkRequest::ContentTypeHeader, QByteArrayLiteral("text/plain; charset=ISO-8859-1"));
 
-    return sendMessage(POST_MSG, REQ_SEND_BROADCAST_DATA_TO_CHANNEL, request, data, true, "");
+	return sendMessage(POST_MSG, REQ_SEND_BROADCAST_DATA_TO_CHANNEL, request, data, true, {});
 
 }
 
@@ -95,51 +95,51 @@ bool QCloudMessagingEmbeddedKaltiotRest::sendBroadcast(const QString &channel, c
 void QCloudMessagingEmbeddedKaltiotRest::xmlHttpRequestReply(QNetworkReply *reply)
 {
 
-    getNetworkManager()->disconnect(SIGNAL(finished(QNetworkReply *)));
-    QString m_msg_uuid = reply->property("uuid").toString();
-    int req_id = reply->property("req_id").toInt();
+	getNetworkManager()->disconnect(SIGNAL(finished(QNetworkReply *)));
+	QString m_msg_uuid = reply->property("uuid").toString();
+	int req_id = reply->property("req_id").toInt();
 
-    if (reply->error()) {
-        emit xmlHttpRequestError(reply->errorString());
+	if (reply->error()) {
+		emit xmlHttpRequestError(reply->errorString());
 
-    }
+	}
 
-    // Ok message, lets proceed.
+	// Ok message, lets proceed.
 
-    QByteArray data(reply->readAll());
+	QByteArray data(reply->readAll());
 
-    switch (req_id) {
-    case REQ_GET_DEVICES_BY_CUSTOMER_ID:
+	switch (req_id) {
+	case REQ_GET_DEVICES_BY_CUSTOMER_ID:
 
-        break;
-    case REQ_GET_ALL_DEVICES: {
-        Q_EMIT remoteClientsReceived(QString::fromUtf8(data));
-    }
-    break;
-    case REQ_SEND_DATA_TO_DEVICE:
+		break;
+	case REQ_GET_ALL_DEVICES: {
+		Q_EMIT remoteClientsReceived(QString::fromUtf8(data));
+	}
+	break;
+	case REQ_SEND_DATA_TO_DEVICE:
 
-        break;
-    case REQ_SEND_BROADCAST_DATA_TO_CHANNEL:
+		break;
+	case REQ_SEND_BROADCAST_DATA_TO_CHANNEL:
 
-        break;
-    case REQ_GET_DEVICE_INFO:
+		break;
+	case REQ_GET_DEVICE_INFO:
 
-        break;
-    }
+		break;
+	}
 
-    reply->deleteLater();
-    clearMessage(m_msg_uuid);
+	reply->deleteLater();
+	clearMessage(m_msg_uuid);
 
 }
 
 // Signals documentation
 /*!
-    \fn QCloudMessagingEmbeddedKaltiotRest::remoteClientsReceived(const QString &clients)
-    This signal is triggered when the return value for requestRemoteClients
-    function is is received
+	\fn QCloudMessagingEmbeddedKaltiotRest::remoteClientsReceived(const QString &clients)
+	This signal is triggered when the return value for requestRemoteClients
+	function is is received
 .
-    \param response
-    Response data is based on the service and can be e.g. a list
-    of client tokens in QString format.
+	\param response
+	Response data is based on the service and can be e.g. a list
+	of client tokens in QString format.
 */
 QT_END_NAMESPACE
